@@ -20,14 +20,15 @@ export class CustomExceptionFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const message = exception instanceof HttpException ? exception.getResponse() : 'Internal Server Error';
+    const response = exception instanceof HttpException ? exception.getResponse() : 'Internal Server Error';
 
-    this.loggingService.error(`An error occurred: ${message}`, exception);
+    this.loggingService.error(JSON.stringify(response), exception);
 
     const responseBody = {
       statusCode: httpStatus,
       timestamp: new Date().toISOString(),
       path: httpAdapter.getRequestUrl(ctx.getRequest()),
+      response
     };
 
     httpAdapter.reply(ctx.getResponse(), responseBody, httpStatus);
