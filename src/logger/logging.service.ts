@@ -1,31 +1,48 @@
-import { Injectable } from '@nestjs/common';
-import { writeFile, mkdir } from 'node:fs/promises';
+import { Injectable, LoggerService } from '@nestjs/common';
+import { writeFile, mkdir, stat, appendFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import { join } from 'path';
+import { compressFile } from '../helpers/compressFile';
 
 @Injectable()
-export class LoggingService {
+export class LoggingService implements LoggerService {
   async writeLogToFile(message: string, isErrorLog?: boolean): Promise<void> {
     const logsFileName = 'logs.txt';
-    const errorLogsFileName = 'errors.txt'
-    const folderPath = 'src/logs'
-    const filePathToLogs = `src/logs/${isErrorLog ? errorLogsFileName : logsFileName}`
+    const errorLogsFileName = 'errors.txt';
+    const folderPath = 'src/logs';
+    const filePathToLogs = join(
+      folderPath,
+      isErrorLog ? errorLogsFileName : logsFileName,
+    );
 
     try {
-      if(!existsSync(folderPath)) {
+      if (!existsSync(folderPath)) {
         await mkdir(folderPath, { recursive: true });
       }
 
-      await writeFile(filePathToLogs, message, { flag: 'w' })
+      await appendFile(filePathToLogs, `${message}\n`);
+
+      const fileStat = await stat(filePathToLogs);
+      const fileSizeInKb = fileStat.size / 1000;
+
+      if (fileSizeInKb > parseInt(process.env.LOG_FILE_MAX_SIZE)) {
+        await compressFile(filePathToLogs, folderPath, isErrorLog);
+        await writeFile(filePathToLogs, '');
+      }
     } catch (err) {
       console.error(err);
-    } 
+    }
   }
 
   async log(message: string): Promise<void> {
-    this.writeLogToFile(message);
+    await this.writeLogToFile(message);
   }
 
-  error(message: string, error: any): void {
-    this.writeLogToFile(`${message}, ${JSON.stringify(error)}`, true);
+  async error(message: string, error: any): Promise<void> {
+    await this.writeLogToFile(`${message}, ${JSON.stringify(error)}`, true);
+  }
+
+  warn(message: string, error: any): void {
+    console.log(`${message}\n ${error}`);
   }
 }

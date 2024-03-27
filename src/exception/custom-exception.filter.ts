@@ -1,4 +1,10 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  ExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import { LoggingService } from '../logger/logging.service';
 
@@ -7,7 +13,7 @@ import { LoggingService } from '../logger/logging.service';
 export class CustomExceptionFilter implements ExceptionFilter {
   constructor(
     private readonly httpAdapterHost: HttpAdapterHost,
-    private readonly loggingService: LoggingService    
+    private readonly loggingService: LoggingService,
   ) {}
 
   catch(exception: unknown, host: ArgumentsHost): void {
@@ -20,7 +26,10 @@ export class CustomExceptionFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const response = exception instanceof HttpException ? exception.getResponse() : 'Internal Server Error';
+    const response =
+      exception instanceof HttpException
+        ? exception.getResponse()
+        : 'Internal Server Error';
 
     this.loggingService.error(JSON.stringify(response), exception);
 
@@ -28,7 +37,7 @@ export class CustomExceptionFilter implements ExceptionFilter {
       statusCode: httpStatus,
       timestamp: new Date().toISOString(),
       path: httpAdapter.getRequestUrl(ctx.getRequest()),
-      response
+      response,
     };
 
     httpAdapter.reply(ctx.getResponse(), responseBody, httpStatus);
