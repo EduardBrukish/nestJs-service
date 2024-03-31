@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid'; 
+import * as bcrypt from 'bcrypt';
 import { SignUpDto } from './dto/signUpDto';
 import { UserService } from '../user/user.service';
 import { UserDto } from '../user/dto/user.dto';
@@ -21,22 +22,23 @@ export class AuthService {
 
   async signUp(signUpDto: SignUpDto): Promise<UserDto> {
     const existingUser = await this.userRepository.findOne({ where: { login: signUpDto.login } });
-console.log('signUpDto', existingUser)
+
     if (existingUser) {
       throw new UnauthorizedException();
     }
 
+    const hashPassword = await bcrypt.hash(signUpDto.password, parseInt(process.env.CRYPT_SALT))
     const newUser = {} as User;
     newUser.id = uuidv4();
     newUser.login = signUpDto.login;
-    newUser.password = signUpDto.password;
+    newUser.password = hashPassword;
     newUser.version = 1;
     newUser.createdAt = new Date().getTime();
     newUser.updatedAt = new Date().getTime();
-
+    
     const userToSave = await this.userRepository.create(newUser);
     const savedUser = await this.userRepository.save(userToSave);
-
+    
     const { password, ...user } = savedUser;
     return user;
   }
@@ -44,7 +46,9 @@ console.log('signUpDto', existingUser)
   async signIn(signInDto: SignUpDto): Promise<{ accessToken: string }> {
     const user = await this.userService.findUserByLogin(signInDto.login);
 
-    if (user?.password !== signInDto.password) {
+    const isMatch = await bcrypt.compare(signInDto.password, user?.password);
+
+    if (!isMatch) {
       throw new UnauthorizedException();
     }
     const payload = { userId: user.id, login: user.login };
