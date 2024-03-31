@@ -5,6 +5,9 @@ import { AuthController } from './auth.controller';
 import { UserModule } from '../user/user.module';
 import { config } from 'dotenv';
 
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from '../user/entity/user.entity';
+
 config();
 
 @Module({
@@ -16,6 +19,7 @@ config();
         expiresIn: process.env.TOKEN_EXPIRE_TIME,
       },
     }),
+    TypeOrmModule.forFeature([User]),
   ],
   controllers: [AuthController],
   providers: [AuthService],

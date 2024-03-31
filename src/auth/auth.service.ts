@@ -1,30 +1,56 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
-import { SignInDto } from './dto/signInDto';
+import { Repository } from 'typeorm';
+import { v4 as uuidv4 } from 'uuid'; 
+import { SignUpDto } from './dto/signUpDto';
 import { UserService } from '../user/user.service';
 import { UserDto } from '../user/dto/user.dto';
+import { User } from '../user/entity/user.entity';
 
 @Injectable({})
 export class AuthService {
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
+    @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
-  async signIn(signInDto: SignInDto): Promise<{ access_token: string }> {
+  async signUp(signUpDto: SignUpDto): Promise<UserDto> {
+    const existingUser = await this.userRepository.findOne({ where: { login: signUpDto.login } });
+console.log('signUpDto', existingUser)
+    if (existingUser) {
+      throw new UnauthorizedException();
+    }
+
+    const newUser = {} as User;
+    newUser.id = uuidv4();
+    newUser.login = signUpDto.login;
+    newUser.password = signUpDto.password;
+    newUser.version = 1;
+    newUser.createdAt = new Date().getTime();
+    newUser.updatedAt = new Date().getTime();
+
+    const userToSave = await this.userRepository.create(newUser);
+    const savedUser = await this.userRepository.save(userToSave);
+
+    const { password, ...user } = savedUser;
+    return user;
+  }
+
+  async signIn(signInDto: SignUpDto): Promise<{ accessToken: string }> {
     const user = await this.userService.findUserByLogin(signInDto.login);
-    console.log('signIn');
+
     if (user?.password !== signInDto.password) {
       throw new UnauthorizedException();
     }
     const payload = { userId: user.id, login: user.login };
-    try {
-      const token = await this.jwtService.signAsync(payload);
-    } catch (e) {
-      console.log(e);
-    }
+
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      accessToken: await this.jwtService.signAsync(payload),
     };
   }
 }
