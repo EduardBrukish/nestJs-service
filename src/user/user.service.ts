@@ -33,6 +33,18 @@ export class UserService {
     return user;
   }
 
+  async findUserByLogin(login: string): Promise<User | undefined> {
+    const user = await this.userRepository.findOne({
+      where: { login },
+    });
+
+    if (!user) {
+      throw new CommonNotFoundException(`User with ID ${login} not found`);
+    }
+
+    return user;
+  }
+
   async createUser(userDto: CreateUserDto): Promise<UserDto> {
     const newUser = {} as User;
     newUser.id = uuidv4();

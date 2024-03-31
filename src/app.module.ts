@@ -1,7 +1,8 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { JwtModule } from '@nestjs/jwt';
 import { LoggerMiddleware } from './logger/logger.middleware';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -10,11 +11,14 @@ import { TrackModule } from './track/track.module';
 import { ArtistModule } from './artist/artist.module';
 import { AlbumModule } from './album/album.module';
 import { FavoritesModule } from './favorites/favorites.module';
+import { AuthModule } from './auth/auth.module';
 import { LoggingService } from './logger/logging.service';
+import { AuthGuard } from './auth/auth.guard';
 import { CustomExceptionFilter } from './exception/custom-exception.filter';
 
 @Module({
   imports: [
+    AuthModule,
     UserModule,
     ArtistModule,
     TrackModule,
@@ -33,6 +37,12 @@ import { CustomExceptionFilter } from './exception/custom-exception.filter';
       autoLoadEntities: true,
       parseInt8: true,
     }),
+    JwtModule.register({
+      secret: process.env.JWT_SECRET_KEY,
+      signOptions: {
+        expiresIn: process.env.TOKEN_EXPIRE_TIME,
+      },
+    }),
   ],
   controllers: [AppController],
   providers: [
@@ -41,6 +51,10 @@ import { CustomExceptionFilter } from './exception/custom-exception.filter';
     {
       provide: APP_FILTER,
       useClass: CustomExceptionFilter,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
     },
   ],
 })
