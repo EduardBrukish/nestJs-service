@@ -1,6 +1,8 @@
 import {
   Injectable,
-  UnauthorizedException
+  UnauthorizedException,
+  HttpException, 
+  HttpStatus
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -49,7 +51,7 @@ export class AuthService {
     const isMatch = await bcrypt.compare(signInDto.password, user?.password);
 
     if (!isMatch) {
-      throw new UnauthorizedException();
+      throw new HttpException(`Wrong user password`, HttpStatus.FORBIDDEN);
     }
     const payload = { userId: user.id, login: user.login };
 

@@ -23,7 +23,7 @@ cd nodejs2024Q1-service
 ## Go to the development branch
 
 ```
-git checkout containerization-db
+git checkout logging-auth
 ```
 
 ## Installing NPM modules

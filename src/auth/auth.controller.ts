@@ -1,23 +1,16 @@
 import {
   Controller,
   Body,
-  Get,
   Post,
-  Delete,
-  Param,
-  UsePipes,
-  ParseUUIDPipe,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
 import {
   ApiTags,
-  ApiNotFoundResponse,
   ApiBadRequestResponse,
   ApiOkResponse,
   ApiCreatedResponse,
-  ApiNoContentResponse,
-  ApiUnprocessableEntityResponse,
+  ApiForbiddenResponse
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dto/signUpDto';
@@ -32,7 +25,7 @@ export class AuthController {
   @Public()
   @Post('signup')
   @ApiCreatedResponse({
-    description: 'The track was successfully added to the favorites.',
+    description: 'The user was successfully added.',
   })
   @ApiBadRequestResponse({ description: 'Invalid login or password' })
   @HttpCode(HttpStatus.CREATED)
@@ -42,10 +35,11 @@ export class AuthController {
 
   @Public()
   @Post('login')
-  @ApiCreatedResponse({
-    description: 'The track was successfully added to the favorites.',
+  @ApiOkResponse({
+    description: 'The user was successfully logged.',
   })
   @ApiBadRequestResponse({ description: 'Invalid login or password' })
+  @ApiForbiddenResponse({ description: 'Wrong user password' })
   @HttpCode(HttpStatus.CREATED)
   async login(@Body() signInDto: SignUpDto): Promise<{ accessToken: string }> {
     return await this.authService.signIn(signInDto);
