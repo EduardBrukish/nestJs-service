@@ -19,4 +19,10 @@ export class User {
 
   @Column({ type: 'bigint' })
   updatedAt: number;
+
+  @Column({ type: 'varchar' })
+  accessToken: string;
+
+  @Column({ type: 'varchar' })
+  refreshToken: string;
 }

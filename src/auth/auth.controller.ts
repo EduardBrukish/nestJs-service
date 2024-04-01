@@ -10,10 +10,11 @@ import {
   ApiBadRequestResponse,
   ApiOkResponse,
   ApiCreatedResponse,
-  ApiForbiddenResponse
+  ApiForbiddenResponse,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { SignUpDto } from './dto/signUpDto';
+import { SignUpDto } from './dto/signUpDto.dto';
 import { Public } from '../public.decorator';
 import { UserDto } from '../user/dto/user.dto';
 
@@ -30,7 +31,7 @@ export class AuthController {
   @ApiBadRequestResponse({ description: 'Invalid login or password' })
   @HttpCode(HttpStatus.CREATED)
   async signUp(@Body() signUpDto: SignUpDto): Promise<UserDto> {
-    return await this.authService.signUp(signUpDto)
+    return await this.authService.signUp(signUpDto);
   }
 
   @Public()
@@ -40,8 +41,23 @@ export class AuthController {
   })
   @ApiBadRequestResponse({ description: 'Invalid login or password' })
   @ApiForbiddenResponse({ description: 'Wrong user password' })
-  @HttpCode(HttpStatus.CREATED)
-  async login(@Body() signInDto: SignUpDto): Promise<{ accessToken: string }> {
+  async login(
+    @Body() signInDto: SignUpDto,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     return await this.authService.signIn(signInDto);
+  }
+
+  @Public()
+  @Post('refresh')
+  @ApiOkResponse({
+    description: 'The token was successfully updated.',
+  })
+  @ApiUnauthorizedResponse({ description: 'Invalid token' })
+  @ApiForbiddenResponse({ description: 'Refresh token is invalid or expired' })
+  @HttpCode(HttpStatus.OK)
+  async refresh(
+    @Body() refreshToken: { refreshToken: string },
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    return await this.authService.refresh(refreshToken);
   }
 }

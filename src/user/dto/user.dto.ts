@@ -15,4 +15,10 @@ export class UserDto {
 
   @ApiProperty()
   updatedAt: number;
+
+  @ApiProperty()
+  accessToken: string;
+
+  @ApiProperty()
+  refreshToken: string;
 }

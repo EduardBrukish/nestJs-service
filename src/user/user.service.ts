@@ -14,7 +14,7 @@ export class UserService {
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
-  async getUsers(): Promise<UserDto[]> {
+  async getUsers(): Promise<User[]> {
     return await this.userRepository.find({
       select: ['id', 'login', 'version', 'updatedAt', 'createdAt'],
     });
@@ -23,7 +23,15 @@ export class UserService {
   async findUser(id: string): Promise<User | undefined> {
     const user = await this.userRepository.findOne({
       where: { id },
-      select: ['id', 'login', 'version', 'updatedAt', 'createdAt'],
+      select: [
+        'id',
+        'login',
+        'version',
+        'updatedAt',
+        'createdAt',
+        'accessToken',
+        'refreshToken',
+      ],
     });
 
     if (!user) {
@@ -53,6 +61,8 @@ export class UserService {
     newUser.version = 1;
     newUser.createdAt = new Date().getTime();
     newUser.updatedAt = new Date().getTime();
+    newUser.accessToken = 'mock';
+    newUser.refreshToken = 'mock';
 
     const userToSave = await this.userRepository.create(newUser);
     const savedUser = await this.userRepository.save(userToSave);
