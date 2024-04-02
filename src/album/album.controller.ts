@@ -67,17 +67,10 @@ export class AlbumController {
   })
   @ApiBadRequestResponse({ description: 'Invalid Id' })
   @ApiNotFoundResponse({ description: 'Album with ID ${id} not found' })
-  @UsePipes(new ValidationPipe())
   async updateAlbum(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() albumDto: AlbumDto,
   ): Promise<Album> {
-    // const album = this.albumService.findAlbum(id);
-
-    // if (!album) {
-    //   throw new CommonNotFoundException(`Album with ID ${id} not found`);
-    // }
-
     return await this.albumService.updateAlbum(id, albumDto);
   }
 

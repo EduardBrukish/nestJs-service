@@ -79,7 +79,6 @@ export class UserController {
   @ApiBadRequestResponse({ description: 'Invalid Id' })
   @ApiNotFoundResponse({ description: 'User with ID ${id} not found' })
   @ApiForbiddenResponse({ description: 'Wrong user password' })
-  @UsePipes(new ValidationPipe())
   async updateUserPassword(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateUserPasswordDto: UpdatePasswordDto,

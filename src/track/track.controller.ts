@@ -67,7 +67,6 @@ export class TrackController {
   })
   @ApiBadRequestResponse({ description: 'Invalid Id' })
   @ApiNotFoundResponse({ description: 'Track with ID ${id} not found' })
-  @UsePipes(new ValidationPipe())
   async updateTrack(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() trackDto: TrackDto,

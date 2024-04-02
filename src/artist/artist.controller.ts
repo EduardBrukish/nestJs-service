@@ -67,7 +67,6 @@ export class ArtistController {
   })
   @ApiBadRequestResponse({ description: 'Invalid Id' })
   @ApiNotFoundResponse({ description: 'Artist with ID ${id} not found' })
-  @UsePipes(new ValidationPipe())
   async updateArtist(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateArtistDto: ArtistDto,
