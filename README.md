@@ -5,9 +5,6 @@
 - Git - [Download & Install Git](https://git-scm.com/downloads).
 - Node.js - [Download & Install Node.js](https://nodejs.org/en/download/) and the npm package manager.
 
-## Docker image
-- Image of the application [Home-library](https://hub.docker.com/repository/docker/edwardbru/nodejs2024q2-service-app/general)
-
 ## Downloading
 
 ```
@@ -17,14 +14,9 @@ git clone git@github.com:EduardBrukish/nodejs2024Q1-service.git
 ## Go to the project folder
 
 ```
-cd nodejs2024Q1-service
+cd nestJs-service
 ```
 
-## Go to the development branch
-
-```
-git checkout logging-auth
-```
 
 ## Installing NPM modules
 
